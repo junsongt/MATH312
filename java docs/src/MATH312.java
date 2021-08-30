@@ -30,7 +30,7 @@ public class MATH312 {
     }
 
 
-    
+
 //===============================================================================================
     //Basics
 
@@ -420,32 +420,116 @@ public class MATH312 {
 
 
     // exponetiation cipher
-    // e is key
+
+    // letter grouping by given prime p, producing # of letters per group
+    // i.e. 2525 < p < 252525, grouping = 2
+    public int grouping(int p) {
+        int length = digitNum(p);
+        if (length % 2 == 1) {
+            return (length - 1) / 2;
+        } else {
+            int bound = 0;
+            for (int i = 0; i < length; i = i + 2) {
+                bound = bound + 25 * power(10, i);
+            }
+            if (p >= bound) {
+                return (length / 2);
+            } else {
+                return (length / 2 - 1);
+            }
+        }
+    }
+
+
+
+    // e is encryptrion key
     public String expEncode(String p, int e, int n) {
-        String c = "";
-        for (int i = 0; i < p.length(); i++) {
-            String sp = p.substring(i, i+1);
-            int indexP = alphabet.indexOf(sp);
-            int indexC = modExp(indexP, e, n);
-            String sc = alphabet.get(indexC);
-            c = c + sc;
+        String cipher = "";
+        int length = p.length();
+        int unitLength = grouping(n);
+        int r = length % unitLength;
+        for (int k = 0; k < r; k++) {
+            p = p + "X";
         }
-        return c;
+
+        for (int i = 0; i < p.length(); i = i + unitLength) {
+            String block = p.substring(i, i+unitLength);
+            int temp = 0;
+            for (int j = 0; j < unitLength; j++) {
+                String letter = block.substring(j, j+1);
+                int index = alphabet.indexOf(letter);
+                int power = (unitLength - 1 - j) * 2;
+                temp = temp + index * power(10, power);
+            }
+
+            Integer result = modExp(temp, e, n);
+            String sc = result.toString();
+            cipher = cipher + " " + sc;
+        }
+        return cipher;
     }
 
+
+//    public String expEncode(String p, int e, int n) {
+//        String c = "";
+//        for (int i = 0; i < p.length(); i++) {
+//            String sp = p.substring(i, i+1);
+//            int indexP = alphabet.indexOf(sp);
+//            int indexC = modExp(indexP, e, n);
+//            String sc = alphabet.get(indexC);
+//            c = c + sc;
+//        }
+//        return c;
+//    }
+
+    // e is encryptrion key, decryption key d = e^-1 (mod n-1) by Fermat's little theorem
     public String expDecode(String c, int e, int n) {
-        String p = "";
+        String plaintext = "";
         int d = inverse(e, n-1);
-        for (int i = 0; i < p.length(); i++) {
-            String sc = c.substring(i, i+1);
-            int indexC = alphabet.indexOf(sc);
-            int indexP = modExp(indexC, d, n);
-            String sp = alphabet.get(indexP);
-            p = p + sp;
+        int unitLength = grouping(n);
+
+        int i = 0;
+        int end = c.length();
+        while (i < end) {
+            int cursor = i;
+            boolean pause = false;
+            while(!pause & cursor < end) {
+                String curr = c.substring(cursor, cursor + 1);
+                if (curr.equals(" ")) {
+                    pause = true;
+                } else {
+                    cursor = cursor + 1;
+                }
+            }
+            String block = c.substring(i, cursor);
+            int temp = Integer.parseInt(block);
+            int result = modExp(temp, d, n);
+
+
+            for (int p = unitLength; p >= 0; p = p - 2) {
+                int index = result / power(10, p);
+                String sp = alphabet.get(index);
+                plaintext = plaintext + sp;
+                result = result - index * power(10, p);
+            }
+            i = cursor + 1;
         }
-        return p;
+        return plaintext;
 
     }
+
+//    public String expDecode(String c, int e, int n) {
+//        String p = "";
+//        int d = inverse(e, n-1);
+//        for (int i = 0; i < p.length(); i++) {
+//            String sc = c.substring(i, i+1);
+//            int indexC = alphabet.indexOf(sc);
+//            int indexP = modExp(indexC, d, n);
+//            String sp = alphabet.get(indexP);
+//            p = p + sp;
+//        }
+//        return p;
+//    }
 
     public String expCrack(String c) {
         return "";
@@ -459,6 +543,7 @@ public class MATH312 {
     //primitive roots
 
     // coprime congruence classes
+    // reduced residue system
     public ArrayList<Integer> coprimeClass(int n) {
         ArrayList<Integer> classes = new ArrayList<>();
         for (int i = 0; i <= n-1; i++) {
@@ -520,7 +605,6 @@ public class MATH312 {
             table.put(a, index);
         }
         return table;
-
     }
 
 
@@ -609,6 +693,20 @@ public class MATH312 {
 //        System.out.println(math312.indexTable(5, 23));
 //        System.out.println(math312.indexTable(7, 22));
 
+
+//        System.out.println(math312.grouping(1300));
+//        System.out.println(math312.grouping(2524));
+//
+//        System.out.println(math312.grouping(2526));
+//        System.out.println(math312.grouping(25251));
+//        System.out.println(math312.grouping(252524));
+//
+//        System.out.println(math312.grouping(252526));
+//        System.out.println(math312.grouping(300000));
+
+
+//        System.out.println(math312.expEncode("DEEPYOGURT", 11, 2621));
+//        System.out.println(math312.expDecode("65 415 1323 1567 150", 11, 2621));
 
 
 

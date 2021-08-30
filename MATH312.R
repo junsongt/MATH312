@@ -171,7 +171,7 @@ discreteLog = function(b, r, n) {
 
 
 
-
+# reduced residue system
 coprimeClass = function(n) {
   classes = NULL
   for (i in (0 : (n-1))) {
