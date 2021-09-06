@@ -497,6 +497,7 @@ public class MATH312 {
 //        return c;
 //    }
 
+
     // e is encryptrion key, decryption key d = e^-1 (mod n-1) by Fermat's little theorem
     public String expDecode(String c, int e, int n) {
         String plaintext = "";
@@ -730,8 +731,8 @@ public class MATH312 {
 //        System.out.println(math312.grouping(300000));
 
 
-        System.out.println(math312.expEncode("DEEPYOGURT", 11, 2621));
-        System.out.println(math312.expDecode("65 415 1323 1567 150", 11, 2621));
+//        System.out.println(math312.expEncode("DEEPYOGURT", 11, 2621));
+//        System.out.println(math312.expDecode("65 415 1323 1567 150", 11, 2621));
 
 
 
