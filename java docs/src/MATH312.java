@@ -67,6 +67,7 @@ public class MATH312 {
         return (degree - 1);
     }
 
+
     // compute number of digits of an integer
     public int digitNum(int a) {
 //        Integer i = a;
@@ -89,13 +90,18 @@ public class MATH312 {
         return powerList;
     }
 
+
     // compute the modular exponetiation by repeated squares while reducing by modulo
     public int modExp(int a, int e, int n) {
         int result = 1;
+        // trivial case: e = 0 => a^0 = 1
         if (e == 0) {
             return (result);
         }
 
+        // when e != 0, then e could be expressed in binary power representation
+        // first, list out the binary powers of e
+        // then sort the powers from min to max
         ArrayList<Integer> powerList = binaryPowerRep(e);
         powerList.sort(Comparator.naturalOrder());
 
@@ -145,7 +151,7 @@ public class MATH312 {
         }
     }
 
-    // compute Bezout's coefficients
+    // compute Bezout's coefficients, i.e. 6x + 9y = 12 ==> [-4, 4]
     public ArrayList<Integer> bezoutCoeff(int a, int b) {
         int g = gcd(a, b);
         a = a / g;
@@ -172,6 +178,7 @@ public class MATH312 {
 
 
     // multiplicative inverse
+    // compute by extracting the first element of Bezout's coeffs, and make it least non-negative
     public int inverse(int a, int n) {
         if (gcd(a, n) != 1) {
             throw new ArithmeticException();
@@ -421,13 +428,14 @@ public class MATH312 {
 
     // exponetiation cipher
 
-    // letter grouping by given prime p, producing # of letters per group
+    // letter grouping by given prime p, producing # of letters per group or block
     // i.e. 2525 < p < 252525, grouping = 2
     public int grouping(int p) {
         int length = digitNum(p);
         if (length % 2 == 1) {
             return (length - 1) / 2;
         } else {
+            // creating bound = 252525...25 which has same length as given p
             int bound = 0;
             for (int i = 0; i < length; i = i + 2) {
                 bound = bound + 25 * power(10, i);
@@ -448,17 +456,24 @@ public class MATH312 {
         int length = p.length();
         int unitLength = grouping(n);
         int r = length % unitLength;
+        // check if the string needs adding additional letters at the end to make group
         for (int k = 0; k < r; k++) {
             p = p + "X";
         }
 
         for (int i = 0; i < p.length(); i = i + unitLength) {
+            //extract the block
             String block = p.substring(i, i+unitLength);
+            // temp is each block's numeric value, i.e. "EH" = 0407 = 407
             int temp = 0;
             for (int j = 0; j < unitLength; j++) {
+                // extract single letter in each block
                 String letter = block.substring(j, j+1);
                 int index = alphabet.indexOf(letter);
+                // power is the exponent of bases(10^2k) forming numeric value
+                // i.e. "EH" = 0407 = 407 = 04 * 10^2 + 07 * 10^0
                 int power = (unitLength - 1 - j) * 2;
+                // accumulate block numeric value by each letter value
                 temp = temp + index * power(10, power);
             }
 
@@ -485,9 +500,12 @@ public class MATH312 {
     // e is encryptrion key, decryption key d = e^-1 (mod n-1) by Fermat's little theorem
     public String expDecode(String c, int e, int n) {
         String plaintext = "";
+        // find decryption key d
         int d = inverse(e, n-1);
         int unitLength = grouping(n);
 
+        // ciphertext given may contain blank spaces to indicate blocks, i.e. "1203 1175 2307 0103"
+        // extract blocks from the ciphertext by cursor stopping at a blank space while deciphering
         int i = 0;
         int end = c.length();
         while (i < end) {
@@ -503,15 +521,24 @@ public class MATH312 {
             }
             String block = c.substring(i, cursor);
             int temp = Integer.parseInt(block);
+
+            // decipher each block from ciphertext
+            // result = direct numeric value of block after applying decryption key d
             int result = modExp(temp, d, n);
-
-
-            for (int p = unitLength; p >= 0; p = p - 2) {
-                int index = result / power(10, p);
+            // translate block numeric value to corresponding letters
+            for (int u = unitLength; u >= 0; u = u - 2) {
+                // power is the exponent of bases(10^2k) forming result
+                // 191301 = 19*10^4 + 13*10^2 + 01*10^0
+                // 20511 = 020511 = 02*10^4 + 05*10^2 + 11*10^0
+                int power = (u - 1) * 2;
+                // extract 2 digits from result at a time to be index
+                int index = result / power(10, power);
                 String sp = alphabet.get(index);
                 plaintext = plaintext + sp;
-                result = result - index * power(10, p);
+                // prepare for the next 2 digits extraction
+                result = result - index * power(10, u);
             }
+            // start extracting the next block
             i = cursor + 1;
         }
         return plaintext;
@@ -531,9 +558,7 @@ public class MATH312 {
 //        return p;
 //    }
 
-    public String expCrack(String c) {
-        return "";
-    }
+
 
 
 
@@ -705,8 +730,8 @@ public class MATH312 {
 //        System.out.println(math312.grouping(300000));
 
 
-//        System.out.println(math312.expEncode("DEEPYOGURT", 11, 2621));
-//        System.out.println(math312.expDecode("65 415 1323 1567 150", 11, 2621));
+        System.out.println(math312.expEncode("DEEPYOGURT", 11, 2621));
+        System.out.println(math312.expDecode("65 415 1323 1567 150", 11, 2621));
 
 
 
