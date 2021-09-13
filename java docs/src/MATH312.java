@@ -31,6 +31,7 @@ public class MATH312 {
 
 
 
+
 //===============================================================================================
     //Basics
 
@@ -560,6 +561,58 @@ public class MATH312 {
 //    }
 
 
+    // determine given integer is a perfect square
+    // Note: To determine a double is an integer, we can use:
+    // if Math.round(n) == n;
+    // if (n % 1 == 0); i.e (312.15 % 1 = 0.15)
+    public boolean isSquare(int n) {
+        if (n < 1) {
+            return false;
+        }
+        double root = Math.sqrt(n);
+        return root % 1 == 0;
+    }
+
+
+    // Fermat's factorization, produce a pair of factors in array
+    public ArrayList<Integer> fermatFactor(int n) {
+        double root = Math.sqrt(n);
+        // Math.ceil() returns double even though it is an integer
+        int f = (int) Math.ceil(root);
+        int r = power(f, 2) - n;
+        boolean stop = false;
+        // increasing f until r is a perfect square or until f - sqrt(r) < 1
+        // worst case: n is prime => n = n * 1 => f - sqrt(r) must be at least 1
+        // if f - sqrt(r) < 1, then n must be a prime, then no need to continue
+        while (!stop) {
+            if (isSquare(r)) {
+                stop = true;
+            } else {
+                double d = f - Math.sqrt(r);
+                if (d < 1) {
+                    stop = true;
+                }
+                f = f + 1;
+                r = power(f, 2) - n;
+            }
+        }
+        // In worst case when n is prime, we can also try f until f = (n+1)/2
+        // since n = n * 1 = (f + (f-1)) * (f - (f-1)) => f = (n+1)/2
+//        while (!isSquare(r) && f <= (n+1)/2) {
+//            f = f + 1;
+//            r = power(f, 2) - n;
+//        }
+        ArrayList<Integer> factors = new ArrayList<>();
+        // if casting to int, result would be rounded (4 down 5 up)
+        int rt = (int) Math.sqrt(r);
+        int factor1 = f - rt;
+        int factor2 = f + rt;
+        factors.add(factor1);
+        factors.add(factor2);
+        return factors;
+    }
+
+
 
 
 
@@ -734,6 +787,10 @@ public class MATH312 {
 //        System.out.println(math312.expEncode("DEEPYOGURT", 11, 2621));
 //        System.out.println(math312.expDecode("65 415 1323 1567 150", 11, 2621));
 
+
+//        System.out.println(math312.fermatFactor(7663));
+//        System.out.println(math312.fermatFactor(5959));
+//        System.out.println(math312.fermatFactor(1009));
 
 
 
