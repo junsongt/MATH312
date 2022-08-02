@@ -229,3 +229,55 @@ indexTable = function(r, n) {
   }
   return (indices)
 }
+
+
+is.prime = function(n) {
+  if (n <= 1) {
+    stop("n should be at least 2!")
+  }
+  if (n == 2) {
+    return (TRUE)
+  } 
+  else {
+    check = TRUE
+    for (i in (2:(n-1))) {
+      if (n %% i == 0) {
+        return (FALSE)
+      }
+    }
+    return (check)
+  }
+}
+
+
+prime.dist = function(start, end) {
+  first = start
+  while (!is.prime(first) && first <= end) {
+    first = first + 1
+  }
+  if (first > end) {
+    stop("no prime!")
+  }
+  maxDist = 0
+  pair = NULL
+  while (first <= end) {
+    second = first + 1
+    while (second <= end && !is.prime(second)) {
+      second = second + 1
+    }
+    if (second <= end) {
+      currDist = second - first
+      if (currDist > maxDist) {
+        maxDist = currDist
+        pair = c(first, second)
+      }
+    }
+    first = second
+  }
+  if (is.null(pair)) {
+    return (data.frame(maxDist=maxDist))
+  }
+  else {
+    return (data.frame(maxDist=maxDist, first=pair[1], second=pair[2]))
+  }
+}
