@@ -7,6 +7,7 @@
 #include <queue>
 #include <stack>
 #include <string>
+#include <typeinfo>
 #include <vector>
 
 // To save std::
@@ -90,6 +91,16 @@ int gcdSteps(int a, int b) {
 
 int is_congruent(int a, int b, int n) {
     return (((a - b) % n) == 0);
+}
+
+// compute the residual class of a mod n
+int residue(int a, int n) {
+    int r = a % n;
+    if (r >= 0) {
+        return r;
+    } else {
+        return (n + r);
+    }
 }
 
 pair<int, int> bezoutCoef(int m, int n) {
@@ -340,7 +351,7 @@ int toDecimal(int n) {
 
 bool is_prime(int n) {
     if (n <= 1) {
-        throw std::invalid_argument("n should be at least 2!");
+        return false;
     }
     if (n == 2) {
         return true;
@@ -383,6 +394,64 @@ int prime_dist(int start, int end) {
     return maxDist;
 }
 
+// row sum
+int rowSum(vector<vector<int>> table, int row) {
+    int sum = 0;
+    for (int i = 0; i < table[row].size(); i++) {
+        int curr = table[row][i];
+        sum = sum + curr;
+    }
+    return sum;
+}
+
+// col sum
+int colSum(vector<vector<int>> table, int col) {
+    int sum = 0;
+    for (int i = 0; i < table.size(); i++) {
+        int curr = table[i][col];
+        sum = sum + curr;
+    }
+    return sum;
+}
+
+// smallest digit sensitive prime (last 2 digits)
+int digitsensitive() {
+    int base = 0;
+    int ret = 0;
+    while (ret == 0) {
+        // create table (10 x 10)
+        base = base + 100;
+        vector<vector<int>> table;
+        for (int i = 0; i <= 9; i++) {
+            int row_start = base + 10 * i;
+            vector<int> row;
+            for (int j = 0; j <= 9; j++) {
+                int curr = row_start + j;
+                if (is_prime(curr)) {
+                    row.push_back(curr);
+                } else {
+                    row.push_back(0);
+                }
+            }
+            table.push_back(row);
+        }
+
+        // search table row & col
+        for (int r = 0; r < table.size(); r++) {
+            for (int c = 0; c < table[r].size(); c++) {
+                int entry = table[r][c];
+                if (is_prime(entry) &&
+                    rowSum(table, r) == entry &&
+                    colSum(table, c) == entry) {
+                    ret = entry;
+                }
+            }
+        }
+    }
+
+    return ret;
+}
+
 //=================================================================
 // Coding theory
 int hammingDistance(string s1, string s2) {
@@ -405,6 +474,47 @@ int hammingDistance(string s1, string s2) {
 //=============================================================
 // Cryptography
 
+// define alphabet
+const vector<string> alphabet = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+
+template <class T>
+int getIndex(vector<T> v, T e) {
+    for (int i = 0; i < v.size(); i++) {
+        if (v[i] == e) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// shift cipher
+// encode with key
+string shiftEncode(string p, int key) {
+    string c = "";
+    for (int i = 0; i < p.length(); i++) {
+        string sp = p.substr(i, 1);
+        int indexP = getIndex(alphabet, sp);
+        int indexC = residue((indexP + key) % 26, 26);
+        string sc = alphabet[indexC];
+        c = c + sc;
+    }
+    return c;
+}
+
+// decode with key
+string shiftDecode(string c, int key) {
+    string p = "";
+    for (int i = 0; i < c.length(); i++) {
+        string sc = c.substr(i, 1);
+        int indexC = getIndex(alphabet, sc);
+        int indexP = residue((indexC - key) % 26, 26);
+        string sp = alphabet[indexP];
+        p = p + sp;
+    }
+    return p;
+}
+
+//=============================================================
 int main() {
     // clock_t start = clock();
     // auto start = chrono::system_clock::now();
@@ -438,6 +548,8 @@ int main() {
     // cout << modExp(2356, 1109, 2881) << endl;
     // cout << modExp(736, 1109, 2881) << endl;
     // cout << modExp(468, 1109, 2881) << endl;
+
+    // cout << digitsensitive() << endl;
 
     // clock_t end = clock();
     // auto end = chrono::system_clock::now();
